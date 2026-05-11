@@ -124,11 +124,11 @@ const Navbar = () => {
               className="h-6 w-6 object-cover"
             /> */}
             <div className="flex-center gap-3">
-              <LinkButton
+              {/* <LinkButton
                 url={'/login'}
                 label={'Log in'}
                 className="border border-primary bg-transparent text-primary hover:text-white py-3"
-              ></LinkButton>
+              ></LinkButton> */}
               <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded">
                 <a
                   href="https://www.experthubllc.com/book/Elevate-Dreams"

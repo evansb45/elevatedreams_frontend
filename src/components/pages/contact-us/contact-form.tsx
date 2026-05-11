@@ -92,6 +92,47 @@ const ContactForm = () => {
                 <p className="text-footerText text-lg font-thin">
                   Houston, TX 77002, USA
                 </p>
+                <p className="text-footerText text-lg font-thin">
+                  Phone: 713-244-6695
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="bg-primary/5 p-3 rounded-full mt-0.5">
+                <FaLocationDot color="#006965" size={22} />
+              </div>
+              <div>
+                <p className="text-footerText text-sm font-semibold uppercase tracking-wide mb-0.5">
+                  Dallas Office
+                </p>
+                <p className="text-footerText text-lg font-thin">
+                  910 S. Pearl Expy, Dallas,
+                </p>
+                <p className="text-footerText text-lg font-thin">
+                  TX 75201, USA
+                </p>
+                <p className="text-footerText text-lg font-thin">
+                  Phone: 214-432-3113
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="bg-primary/5 p-3 rounded-full mt-0.5">
+                <FaLocationDot color="#006965" size={22} />
+              </div>
+              <div>
+                <p className="text-footerText text-sm font-semibold uppercase tracking-wide mb-0.5">
+                  Port Harcourt Office
+                </p>
+                <p className="text-footerText text-lg font-thin">
+                  ExpertHub Tank, Rumukwurusi,
+                </p>
+                <p className="text-footerText text-lg font-thin">
+                  Port Harcourt, Rivers State, Nigeria
+                </p>
+                <p className="text-footerText text-lg font-thin">
+                  Phone: +234 811 848 4516
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -100,14 +141,6 @@ const ContactForm = () => {
               </div>
               <p className="text-footerText text-lg font-thin">
                 assist@elevatedreams.com
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/5 p-3 rounded-full">
-                <FaPhone color="#006965" size={22} />
-              </div>
-              <p className="text-footerText text-lg font-thin">
-                +234 811 848 4516
               </p>
             </div>
           </div>
