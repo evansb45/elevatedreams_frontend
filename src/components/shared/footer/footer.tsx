@@ -20,7 +20,7 @@ import SocialLinks from './footer-social-links'
 
 const footerLinks = [
   { label: 'About Us', href: '/about-us' },
-  { label: 'Services', href: '/immigration' },
+  { label: 'Services', href: '/services' },
   { label: 'Our Team', href: '/our-team' },
   { label: 'Blogs', href: '/' },
   { label: 'Contact Us', href: '/contact-us' },
@@ -97,7 +97,8 @@ export const Footer = () => {
 
               <p className="mt-8 max-w-xs lg:max-w-none w-full md:w-96 text-footerText font-medium text-medium ">
                 <h3 className="text-secondary">Houston Office:</h3>
-                4008 Chartres St, Houston, TX 77004, USA Phone: 713-244-6695
+                <p>4201 Main St Suite 200, Houston, TX 77002, USA</p>
+                <p>Phone: 713-244-6695</p>
               </p>
 
               <p className="mt-8 max-w-xs lg:max-w-none w-full md:w-96 text-footerText font-medium text-medium ">

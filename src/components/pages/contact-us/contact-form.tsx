@@ -3,7 +3,7 @@
 import countries from '@/components/pages/contact-us/countries'
 import emailjs from '@emailjs/browser'
 import React, { useState } from 'react'
-import { FaPhone, FaRegEnvelope } from 'react-icons/fa6'
+import { FaLocationDot, FaPhone, FaRegEnvelope } from 'react-icons/fa6'
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -75,11 +75,25 @@ const ContactForm = () => {
     <div className="def-contain mb-8 lg:mt-16">
       <div className="grid 2xl:gap-8 lg:grid-cols-2">
         {/* Contact Info Section */}
-        <div className="flex flex-col justify-center items-center lg:items-start font-jakarta lg:relative">
-          <h1 className="text-5xl font-semibold py-8 lg:absolute lg:top-1">
-            Get in Touch with Us
-          </h1>
+        <div className="flex flex-col justify-center items-center lg:items-start font-jakarta">
+          <h1 className="text-5xl font-semibold pb-8">Get in Touch with Us</h1>
           <div className="grid gap-5">
+            <div className="flex items-start gap-3">
+              <div className="bg-primary/5 p-3 rounded-full mt-0.5">
+                <FaLocationDot color="#006965" size={22} />
+              </div>
+              <div>
+                <p className="text-footerText text-sm font-semibold uppercase tracking-wide mb-0.5">
+                  Houston Office
+                </p>
+                <p className="text-footerText text-lg font-thin">
+                  4201 Main St Suite 200,
+                </p>
+                <p className="text-footerText text-lg font-thin">
+                  Houston, TX 77002, USA
+                </p>
+              </div>
+            </div>
             <div className="flex items-center gap-3">
               <div className="bg-primary/5 p-3 rounded-full">
                 <FaRegEnvelope color="#006965" size={22} />

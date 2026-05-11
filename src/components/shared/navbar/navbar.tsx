@@ -131,7 +131,7 @@ const Navbar = () => {
               ></LinkButton>
               <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded">
                 <a
-                  href="https://www.speakmeet.com/elevatedreams"
+                  href="https://www.experthubllc.com/book/Elevate-Dreams"
                   target="_blank"
                 >
                   Get Started

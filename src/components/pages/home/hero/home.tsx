@@ -6,11 +6,7 @@ import Navigation from './navigation'
 
 type Props = {}
 const HomeHero: FC<Props> = ({}) => {
-  const list = [
-    '/images/hero/img1.png',
-    '/images/hero/img2.png',
-    'images/hero/img3.png',
-  ]
+  const list = ['/images/hero/img2.png', 'images/hero/img3.png']
   const [currentIndex, setCurrentIndex] = useState(0)
 
   const nextSlide = () => {

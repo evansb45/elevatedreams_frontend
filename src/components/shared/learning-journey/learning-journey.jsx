@@ -29,7 +29,7 @@ const LearningJourney = () => {
           </div>
 
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 mt-4 text-center">
-          <a href="https://www.speakmeet.com/elevatedreams">Book A Consultation</a>
+          <a href="https://www.experthubllc.com/book/Elevate-Dreams">Book A Consultation</a>
           </h1>
 
           <p className="md:text-lg text-base md:font-light font-[10] mb-12 mt-3 text-center">
@@ -37,7 +37,7 @@ const LearningJourney = () => {
           </p>
 
           <LinkButton
-            url={"https://www.speakmeet.com/elevatedreams"}
+            url={"https://www.experthubllc.com/book/Elevate-Dreams"}
             label={"Get Started"}
             isIcon={true}
             className="w-[#177px]"
