@@ -1,0 +1,19 @@
+// prisma/schema.prisma
+
+model MetaEvent {
+  id          String   @id @default(cuid())
+  eventName   String   // PageView, Lead, ViewContent, GetStartedClick, etc.
+  contentName String?
+  contentId   String?
+  value       Float?
+  currency    String?  @default("USD")
+  location    String?  // navbar, hero, services-page, etc.
+  path        String?  // current page path
+  userAgent   String?
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  @@index([eventName])
+  @@index([createdAt])
+  @@index([contentName])
+}
