@@ -773,7 +773,7 @@ export default function AdminDashboard() {
                               },
                             )}
                           </td>
-                          <td className="py-4 px-6 text-right no-print">
+                          {/* <td className="py-4 px-6 text-right no-print">
                             <button
                               onClick={() => promptDelete(lead)}
                               title="Delete submission"
@@ -785,7 +785,7 @@ export default function AdminDashboard() {
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                          </td>
+                          </td> */}
                         </tr>
                       ))}
                     </tbody>
