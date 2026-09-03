@@ -5,7 +5,7 @@ const $http = axios.create({
     envVariable === "production"
       ? "https://loctech-web-api.vercel.app/api/v1"
       : // "https://carewomen-dev.vercel.app/"
-        "http://localhost:8000/",
+        "http://localhost:3000/",
   headers: { "Content-Type": "application/json" },
 });
 

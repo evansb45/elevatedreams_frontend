@@ -22,7 +22,9 @@
     "framer-motion": "^11.5.4",
     "lucide-react": "^0.439.0",
     "mongodb": "^7.6.0",
+    "mongoose": "^9.9.4",
     "next": "^14.1.0",
+    "nodemailer": "^9.1.1",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.53.0",
@@ -30,11 +32,14 @@
     "react-loader-spinner": "^6.1.6",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
-    "yup": "^1.4.0"
+    "xlsx": "^0.18.5",
+    "yup": "^1.4.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
