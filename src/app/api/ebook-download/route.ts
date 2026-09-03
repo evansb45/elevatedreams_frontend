@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       surname,
       email,
       phone,
-      company: company || null,
+      company: company || undefined,
     })
     console.log(
       '[API /api/ebook-download] Lead successfully saved with ID:',
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     )
 
     const transporter = nodemailer.createTransport({
-      host: 'smtp.zoho.com', // Switched to standard smtp.zoho.com (try smtppro.zoho.com if this fails)
+      host: 'smtp.zoho.com',
       port: 465,
       secure: true,
       auth: {
@@ -66,7 +66,6 @@ export async function POST(request: Request) {
       },
     })
 
-    // Path pointing to your actual file structure: public/documents/usguide.pdf (or ip.pdf)
     const filePath = path.join(
       process.cwd(),
       'public',
@@ -83,23 +82,18 @@ export async function POST(request: Request) {
             <div style="background-color: #f1f5f9; padding: 40px 16px; font-family: 'Rethink Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
             <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.05);">
               
-              <!-- Top Gradient Brand Accent -->
               <div style="height: 6px; background: linear-gradient(90deg, #0f172a, #0d9488, #0f172a);"></div>
           
-              <!-- Main Content Container -->
               <div style="padding: 48px 40px 36px 40px;">
                 
-                <!-- Greeting -->
                 <h2 style="color: #0f172a; font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 24px; letter-spacing: -0.03em;">
                   Hi ${firstName},
                 </h2>
                 
-                <!-- Introductory Paragraph -->
                 <p style="font-size: 15px; line-height: 1.7; color: #475569; margin-top: 0; margin-bottom: 20px;">
                   Thank you for downloading our exclusive eBook. Your requested resource has been securely attached directly to this email so you can begin reading right away.
                 </p>
           
-                <!-- Value / Highlight Box -->
                 <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #0d9488; padding: 20px 24px; border-radius: 0 16px 16px 0; margin-bottom: 24px;">
                   <p style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 6px 0;">
                     💡 Pro Tip for Implementation
@@ -109,12 +103,10 @@ export async function POST(request: Request) {
                   </p>
                 </div>
           
-                <!-- Secondary Body Paragraph -->
                 <p style="font-size: 15px; line-height: 1.7; color: #475569; margin-bottom: 32px;">
                   Whether you are looking to scale your current trajectory or have questions about putting these frameworks into practice, our team is always here to support your journey.
                 </p>
           
-                <!-- Action Button to Main Site -->
                 <div style="text-align: center; margin-bottom: 36px;">
                   <a href="https://www.elevatedreams.com/" target="_blank" style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 14px; font-weight: 700; text-decoration: none; padding: 14px 28px; border-radius: 12px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); transition: background-color 0.2s ease;">
                     Visit Our Main Website &rarr;
@@ -123,7 +115,6 @@ export async function POST(request: Request) {
           
                 <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
           
-                <!-- Sign-off Section -->
                 <table style="width: 100%; border-collapse: collapse;">
                   <tr>
                     <td>
@@ -138,7 +129,6 @@ export async function POST(request: Request) {
           
               </div>
           
-              <!-- Footer -->
               <div style="background-color: #f8fafc; padding: 24px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
                 <p style="font-size: 13px; color: #64748b; margin: 0 0 8px 0; font-weight: 500;">
                   Empowering your vision every step of the way.

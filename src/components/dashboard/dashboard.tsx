@@ -2,12 +2,15 @@
 
 import {
   AlertTriangle,
-  Calendar as CalendarIcon,
   Download,
+  Eye,
   FileSpreadsheet,
+  Inbox,
+  MousePointerClick,
   RefreshCw,
   Search,
   Trash2,
+  TrendingUp,
   X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -23,46 +26,82 @@ interface Lead {
   createdAt: string
 }
 
+interface Analytics {
+  visits: number
+  clicks: number
+  conversionRate: string
+}
+
+interface ButtonClick {
+  _id: string
+  buttonName: string
+  path: string
+  createdAt: string
+}
+
+const DATE_TABS = [
+  { label: 'All time', value: 'all' },
+  { label: 'Today', value: 'today' },
+  { label: 'Last 7 days', value: '7days' },
+  { label: 'Last 30 days', value: '30days' },
+]
+
 export default function AdminDashboard() {
   const [leads, setLeads] = useState<Lead[]>([])
+  const [analytics, setAnalytics] = useState<Analytics>({
+    visits: 0,
+    clicks: 0,
+    conversionRate: '0%',
+  })
+  const [buttonClicks, setButtonClicks] = useState<ButtonClick[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-
-  // Date filtering states ("all", "today", "7days", "30days")
   const [dateFilter, setDateFilter] = useState('all')
+  const [activeTab, setActiveTab] = useState<'clicks' | 'downloads'>('clicks')
 
-  // Modal State Control & Target Lead for Deletion
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
-    fetchLeads()
+    fetchData()
   }, [])
 
-  const fetchLeads = async () => {
+  const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/submissions')
-      const result = await res.json()
-      if (res.ok) {
-        setLeads(result.data || [])
+      const [leadsRes, analyticsRes] = await Promise.all([
+        fetch('/api/admin/submissions'),
+        fetch('/api/admin/analytics'),
+      ])
+
+      const leadsResult = await leadsRes.json()
+      if (leadsRes.ok) {
+        setLeads(leadsResult.data || [])
+      }
+
+      if (analyticsRes.ok) {
+        const analyticsResult = await analyticsRes.json()
+        setAnalytics({
+          visits: analyticsResult.visits ?? 0,
+          clicks: analyticsResult.clicks ?? 0,
+          conversionRate: analyticsResult.conversionRate ?? '0%',
+        })
+        setButtonClicks(analyticsResult.data?.buttonClicks || [])
       }
     } catch (err) {
-      console.error('Failed to load leads', err)
+      console.error('Failed to load dashboard data', err)
     } finally {
       setLoading(false)
     }
   }
 
-  // Step 1: Open Modal & Save target ID to LocalStorage
   const promptDelete = (lead: Lead) => {
     setLeadToDelete(lead)
     localStorage.setItem('pending_delete_lead_id', lead._id)
     setIsModalOpen(true)
   }
 
-  // Step 2: Confirm Delete from LocalStorage ID with fallback cleanup
   const confirmDelete = async () => {
     const targetId = localStorage.getItem('pending_delete_lead_id')
     if (!targetId) {
@@ -85,7 +124,6 @@ export default function AdminDashboard() {
       console.error('Error deleting lead:', err)
       alert('Something went wrong while deleting.')
     } finally {
-      // Always clear localStorage ID and close modal, even if deletion failed
       localStorage.removeItem('pending_delete_lead_id')
       setIsDeleting(false)
       setIsModalOpen(false)
@@ -93,14 +131,12 @@ export default function AdminDashboard() {
     }
   }
 
-  // Cancel Modal & Clear LocalStorage
   const cancelDelete = () => {
     localStorage.removeItem('pending_delete_lead_id')
     setIsModalOpen(false)
     setLeadToDelete(null)
   }
 
-  // Export to Excel (.xlsx)
   const exportToExcel = () => {
     if (filteredLeads.length === 0) return
     const worksheetData = filteredLeads.map((l) => ({
@@ -121,12 +157,10 @@ export default function AdminDashboard() {
     )
   }
 
-  // Export to PDF (Print / Save as PDF view)
   const exportToPDF = () => {
     window.print()
   }
 
-  // Filter leads based on Search and Date filter
   const filteredLeads = leads.filter((lead) => {
     const matchesSearch =
       lead.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -136,7 +170,6 @@ export default function AdminDashboard() {
         lead.company.toLowerCase().includes(searchTerm.toLowerCase()))
 
     if (!matchesSearch) return false
-
     if (dateFilter === 'all') return true
 
     const leadDate = new Date(lead.createdAt).getTime()
@@ -152,72 +185,111 @@ export default function AdminDashboard() {
 
   return (
     <main
-      className="min-h-screen py-16 px-4 sm:px-8 bg-slate-50 text-slate-900 relative"
-      style={{ fontFamily: "'Rethink Sans', sans-serif" }}
+      className="min-h-screen py-16 px-6 sm:px-10 relative"
+      style={{
+        fontFamily: "'Rethink Sans', sans-serif",
+        background: 'var(--bg)',
+        color: 'var(--ink-900)',
+      }}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Rethink+Sans:ital,wght@0,400..800;1,400..800&display=swap');
+
+        :root {
+          --bg: #F4F7F6;
+          --surface: #FFFFFF;
+          --border: #D8E2E0;
+          --border-strong: #0D9488;
+          --ink-900: #0F172A;
+          --ink-600: #475569;
+          --ink-400: #94A3B8;
+          --primary: #0D9488;
+          --primary-dark: #0F766E;
+          --primary-soft: #F0FDFA;
+          --warn: #991B1B;
+          --warn-soft: #FEF2F2;
+        }
+
         @keyframes shimmer {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
         }
         .animate-shimmer {
-          background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+          background: linear-gradient(90deg, #E2E8F0 0%, #CBD5E1 50%, #E2E8F0 100%);
           background-size: 200% 100%;
           animation: shimmer 1.5s infinite;
         }
+
         @media print {
           body { background: white !important; color: black !important; }
-          button, input, select, .no-print { display: none !important; }
-          table { width: 100% !important; border: 1px solid #cbd5e1 !important; }
-          th, td { border: 1px solid #cbd5e1 !important; color: black !important; }
+          button, input, .no-print { display: none !important; }
+          table { width: 100% !important; border: 1px solid #ccc !important; }
+          th, td { border: 1px solid #ccc !important; color: black !important; }
         }
       `}</style>
 
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div
+          className="flex flex-col md:flex-row justify-between items-start md:items-end gap-5 pb-6 border-b"
+          style={{ borderColor: 'var(--border)' }}
+        >
           <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              E-book Submissions
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
+              style={{
+                background: 'var(--primary-soft)',
+                color: 'var(--primary-dark)',
+              }}
+            >
+              <span>Admin Portal</span>
+            </div>
+            <h1
+              className="text-3xl sm:text-4xl font-extrabold tracking-tight"
+              style={{ color: 'var(--ink-900)' }}
+            >
+              E-book Submissions & Analytics
             </h1>
             <p
-              style={{ color: '#000' }}
-              className="text-slate-900 mt-1 text-sm sm:text-base"
+              className="mt-2 text-sm sm:text-base font-normal"
+              style={{ color: 'var(--ink-600)' }}
             >
-              Manage leads, evaluate resource metrics, and export reports
-              effortlessly.
+              Monitor incoming leads, track landing page traffic, and export
+              clean records.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 no-print">
-            {/* Refresh / Reload Button */}
             <button
-              onClick={fetchLeads}
+              onClick={fetchData}
               disabled={loading}
-              title="Reload submissions"
-              className="p-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold shadow-xs transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center"
+              title="Reload data"
+              className="p-3 rounded-xl border transition-all duration-150 disabled:opacity-50 cursor-pointer flex items-center justify-center bg-white"
+              style={{ borderColor: 'var(--border)', color: 'var(--ink-600)' }}
             >
               <RefreshCw
                 className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
               />
             </button>
 
-            {/* Excel Export Button */}
             <button
               onClick={exportToExcel}
               disabled={filteredLeads.length === 0 || loading}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex items-center gap-2 px-4 py-3 rounded-xl border font-bold text-sm transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer bg-white"
+              style={{
+                borderColor: 'var(--primary)',
+                color: 'var(--primary-dark)',
+              }}
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Export Excel</span>
             </button>
 
-            {/* PDF Export Button */}
             <button
               onClick={exportToPDF}
               disabled={filteredLeads.length === 0 || loading}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-white"
+              style={{ background: 'var(--primary)' }}
             >
               <Download className="w-4 h-4" />
               <span>Export PDF</span>
@@ -225,211 +297,557 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Total Submissions
-            </span>
-            <p className="text-3xl font-extrabold text-slate-900 mt-2">
-              {leads.length}
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Filtered Results
-            </span>
-            <p className="text-3xl font-extrabold text-teal-600 mt-2">
-              {filteredLeads.length}
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Unique Companies
-            </span>
-            <p className="text-3xl font-extrabold text-slate-900 mt-2">
-              {new Set(leads.map((l) => l.company).filter(Boolean)).size}
-            </p>
-          </div>
-        </div>
-
-        {/* Filters and Search Bar Container */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row gap-4 justify-between items-center no-print">
-          {/* Search Input */}
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search leads..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition-all"
-            />
-          </div>
-
-          {/* Date Filter Selection */}
-          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-            <CalendarIcon className="w-4 h-4 text-slate-400 shrink-0 hidden sm:block" />
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider shrink-0">
-              Filter:
-            </span>
-            {[
-              { label: 'All Time', value: 'all' },
-              { label: 'Today', value: 'today' },
-              { label: 'Last 7 Days', value: '7days' },
-              { label: 'Last 30 Days', value: '30days' },
-            ].map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setDateFilter(tab.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-                  dateFilter === tab.value
-                    ? 'bg-teal-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+        {/* Metrics Grid */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-5 rounded-2xl border overflow-hidden bg-white"
+          style={{ borderColor: 'var(--border)' }}
+        >
+          {[
+            {
+              label: 'Page visits',
+              value: analytics.visits,
+              color: 'var(--ink-900)',
+              icon: Eye,
+            },
+            {
+              label: 'CTA clicks',
+              value: analytics.clicks,
+              color: 'var(--ink-900)',
+              icon: MousePointerClick,
+            },
+            {
+              label: 'Conversion rate',
+              value: analytics.conversionRate,
+              color: 'var(--primary-dark)',
+              icon: TrendingUp,
+            },
+            {
+              label: 'Total submissions',
+              value: leads.length,
+              color: 'var(--ink-900)',
+            },
+            {
+              label: 'Unique companies',
+              value: new Set(leads.map((l) => l.company).filter(Boolean)).size,
+              color: 'var(--ink-900)',
+            },
+          ].map((stat, i) => (
+            <div
+              key={stat.label}
+              className="p-6 flex flex-col justify-between"
+              style={
+                i > 0
+                  ? {
+                      borderTop: '1px solid var(--border)',
+                      borderLeft: '1px solid var(--border)',
+                    }
+                  : undefined
+              }
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ color: 'var(--ink-400)' }}
+                >
+                  {stat.label}
+                </span>
+                {stat.icon && (
+                  <stat.icon
+                    className="w-4 h-4"
+                    style={{ color: 'var(--primary)' }}
+                  />
+                )}
+              </div>
+              <p
+                className="text-3xl font-extrabold mt-4"
+                style={{ color: stat.color }}
               >
-                {tab.label}
-              </button>
-            ))}
+                {stat.value}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Toggle Tabs */}
+        <div className="flex items-center gap-2 no-print">
+          <div
+            className="flex items-center gap-1 p-1 bg-white rounded-xl border"
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <button
+              onClick={() => setActiveTab('clicks')}
+              className="px-4 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer flex items-center gap-2"
+              style={{
+                background:
+                  activeTab === 'clicks' ? 'var(--primary)' : 'transparent',
+                color: activeTab === 'clicks' ? '#FFFFFF' : 'var(--ink-600)',
+              }}
+            >
+              <MousePointerClick className="w-4 h-4" />
+              Button Clicks
+              <span
+                className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                style={{
+                  background:
+                    activeTab === 'clicks'
+                      ? 'rgba(255,255,255,0.2)'
+                      : 'var(--primary-soft)',
+                  color:
+                    activeTab === 'clicks' ? '#FFFFFF' : 'var(--primary-dark)',
+                }}
+              >
+                {buttonClicks.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('downloads')}
+              className="px-4 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer flex items-center gap-2"
+              style={{
+                background:
+                  activeTab === 'downloads' ? 'var(--primary)' : 'transparent',
+                color: activeTab === 'downloads' ? '#FFFFFF' : 'var(--ink-600)',
+              }}
+            >
+              <Download className="w-4 h-4" />
+              Download Logs
+              <span
+                className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                style={{
+                  background:
+                    activeTab === 'downloads'
+                      ? 'rgba(255,255,255,0.2)'
+                      : 'var(--primary-soft)',
+                  color:
+                    activeTab === 'downloads'
+                      ? '#FFFFFF'
+                      : 'var(--primary-dark)',
+                }}
+              >
+                {leads.length}
+              </span>
+            </button>
           </div>
         </div>
 
-        {/* Data Table Container */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-          {loading ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-sm">
-                <thead>
-                  <tr className="bg-slate-50/75 border-b border-slate-200 text-slate-400 text-xs uppercase tracking-wider font-bold">
-                    <th className="py-3.5 px-5">Full Name</th>
-                    <th className="py-3.5 px-5">Email Address</th>
-                    <th className="py-3.5 px-5">Phone</th>
-                    <th className="py-3.5 px-5">Company</th>
-                    <th className="py-3.5 px-5">Date</th>
-                    <th className="py-3.5 px-5 text-right no-print">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {[1, 2, 3, 4, 5].map((row) => (
-                    <tr key={row}>
-                      <td className="py-4 px-5">
-                        <div className="h-4 w-32 rounded animate-shimmer"></div>
-                      </td>
-                      <td className="py-4 px-5">
-                        <div className="h-4 w-44 rounded animate-shimmer"></div>
-                      </td>
-                      <td className="py-4 px-5">
-                        <div className="h-4 w-28 rounded animate-shimmer"></div>
-                      </td>
-                      <td className="py-4 px-5">
-                        <div className="h-4 w-20 rounded animate-shimmer"></div>
-                      </td>
-                      <td className="py-4 px-5">
-                        <div className="h-4 w-24 rounded animate-shimmer"></div>
-                      </td>
-                      <td className="py-4 px-5 text-right no-print">
-                        <div className="h-8 w-8 rounded ml-auto animate-shimmer"></div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* ===================== BUTTON CLICKS TAB ===================== */}
+        {activeTab === 'clicks' && (
+          <div
+            className="rounded-2xl border overflow-hidden bg-white"
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <div
+              className="px-6 py-4 border-b flex items-center justify-between"
+              style={{
+                borderColor: 'var(--border)',
+                background: 'var(--bg)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <MousePointerClick
+                  className="w-4 h-4"
+                  style={{ color: 'var(--primary)' }}
+                />
+                <h2
+                  className="text-sm font-bold uppercase tracking-wider"
+                  style={{ color: 'var(--ink-600)' }}
+                >
+                  Button Clicks Log
+                </h2>
+              </div>
+              <span
+                className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                style={{
+                  background: 'var(--primary-soft)',
+                  color: 'var(--primary-dark)',
+                }}
+              >
+                {buttonClicks.length} total
+              </span>
             </div>
-          ) : filteredLeads.length === 0 ? (
-            <div className="text-center py-16 text-slate-400 text-sm font-medium">
-              No matching submissions found.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-sm">
-                <thead>
-                  <tr className="bg-slate-50/75 border-b border-slate-200 text-slate-400 text-xs uppercase tracking-wider font-bold">
-                    <th className="py-3.5 px-5">Full Name</th>
-                    <th className="py-3.5 px-5">Email Address</th>
-                    <th className="py-3.5 px-5">Phone</th>
-                    <th className="py-3.5 px-5">Company</th>
-                    <th className="py-3.5 px-5">Date</th>
-                    <th className="py-3.5 px-5 text-right no-print">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {filteredLeads.map((lead) => (
+
+            {loading ? (
+              <div className="p-6 space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-10 rounded animate-shimmer" />
+                ))}
+              </div>
+            ) : buttonClicks.length === 0 ? (
+              <div className="text-center py-16 flex flex-col items-center gap-3">
+                <div
+                  className="p-4 rounded-2xl"
+                  style={{ background: 'var(--primary-soft)' }}
+                >
+                  <MousePointerClick
+                    className="w-7 h-7"
+                    style={{ color: 'var(--primary)' }}
+                  />
+                </div>
+                <p
+                  className="text-base font-bold"
+                  style={{ color: 'var(--ink-900)' }}
+                >
+                  No button clicks recorded yet
+                </p>
+                <p
+                  className="text-sm font-normal"
+                  style={{ color: 'var(--ink-600)' }}
+                >
+                  Clicks will appear here as users interact with the landing
+                  page.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
                     <tr
-                      key={lead._id}
-                      className="hover:bg-slate-50/60 transition-colors"
+                      className="text-xs font-bold uppercase tracking-wider"
+                      style={{
+                        background: 'var(--bg)',
+                        color: 'var(--ink-600)',
+                        borderBottom: '1px solid var(--border)',
+                      }}
                     >
-                      <td className="py-4 px-5 font-semibold text-slate-900">
-                        {lead.firstName} {lead.surname}
-                      </td>
-                      <td className="py-4 px-5 text-teal-600 font-medium">
-                        {lead.email}
-                      </td>
-                      <td className="py-4 px-5 text-slate-600">{lead.phone}</td>
-                      <td className="py-4 px-5 text-slate-600">
-                        {lead.company || '—'}
-                      </td>
-                      <td className="py-4 px-5 text-slate-500 text-xs">
-                        {new Date(lead.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </td>
-                      <td className="py-4 px-5 text-right no-print">
-                        <button
-                          onClick={() => promptDelete(lead)}
-                          title="Delete submission"
-                          className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
+                      <th className="py-3.5 px-6">#</th>
+                      <th className="py-3.5 px-6">Button Title</th>
+                      <th className="py-3.5 px-6">Path</th>
+                      <th className="py-3.5 px-6 text-right">Clicked At</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {buttonClicks.map((click, index) => (
+                      <tr
+                        key={click._id}
+                        className="transition-all"
+                        style={{ borderTop: '1px solid var(--border)' }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background =
+                            'var(--primary-soft)')
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = 'transparent')
+                        }
+                      >
+                        <td
+                          className="py-3.5 px-6 font-medium"
+                          style={{ color: 'var(--ink-400)' }}
+                        >
+                          {index + 1}
+                        </td>
+                        <td
+                          className="py-3.5 px-6 font-bold"
+                          style={{ color: 'var(--ink-900)' }}
+                        >
+                          {click.buttonName}
+                        </td>
+                        <td
+                          className="py-3.5 px-6 font-medium"
+                          style={{ color: 'var(--ink-600)' }}
+                        >
+                          {click.path}
+                        </td>
+                        <td
+                          className="py-3.5 px-6 text-right text-xs font-semibold"
+                          style={{ color: 'var(--ink-400)' }}
+                        >
+                          {new Date(click.createdAt).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===================== DOWNLOAD LOGS TAB ===================== */}
+        {activeTab === 'downloads' && (
+          <>
+            {/* Search & Date Tabs */}
+            <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between no-print">
+              <div className="relative w-full md:w-80">
+                <Search
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'var(--ink-400)' }}
+                />
+                <input
+                  type="text"
+                  placeholder="Search by name, email, company..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border text-sm font-medium focus:outline-none transition-all bg-white"
+                  style={{
+                    borderColor: 'var(--border)',
+                    color: 'var(--ink-900)',
+                  }}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.borderColor = 'var(--primary)')
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.borderColor = 'var(--border)')
+                  }
+                />
+              </div>
+
+              <div
+                className="flex items-center gap-2 p-1 bg-white rounded-xl border"
+                style={{ borderColor: 'var(--border)' }}
+              >
+                {DATE_TABS.map((tab) => {
+                  const active = dateFilter === tab.value
+                  return (
+                    <button
+                      key={tab.value}
+                      onClick={() => setDateFilter(tab.value)}
+                      className="px-3.5 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap"
+                      style={{
+                        background: active ? 'var(--primary)' : 'transparent',
+                        color: active ? '#FFFFFF' : 'var(--ink-600)',
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Submissions Table */}
+            <div
+              className="rounded-2xl border overflow-hidden bg-white"
+              style={{ borderColor: 'var(--border)' }}
+            >
+              {loading ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr
+                        className="text-xs font-bold uppercase tracking-wider"
+                        style={{
+                          background: 'var(--bg)',
+                          color: 'var(--ink-600)',
+                          borderBottom: '1px solid var(--border)',
+                        }}
+                      >
+                        <th className="py-4 px-6">Full name</th>
+                        <th className="py-4 px-6">Email address</th>
+                        <th className="py-4 px-6">Phone</th>
+                        <th className="py-4 px-6">Company</th>
+                        <th className="py-4 px-6">Date</th>
+                        <th className="py-4 px-6 text-right no-print">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[1, 2, 3, 4, 5].map((row) => (
+                        <tr
+                          key={row}
+                          style={{ borderTop: '1px solid var(--border)' }}
+                        >
+                          <td className="py-4 px-6">
+                            <div className="h-4 w-32 rounded animate-shimmer" />
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="h-4 w-44 rounded animate-shimmer" />
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="h-4 w-28 rounded animate-shimmer" />
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="h-4 w-20 rounded animate-shimmer" />
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="h-4 w-24 rounded animate-shimmer" />
+                          </td>
+                          <td className="py-4 px-6 text-right no-print">
+                            <div className="h-8 w-8 rounded ml-auto animate-shimmer" />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : filteredLeads.length === 0 ? (
+                <div className="text-center py-24 flex flex-col items-center gap-3">
+                  <div
+                    className="p-4 rounded-2xl"
+                    style={{ background: 'var(--primary-soft)' }}
+                  >
+                    <Inbox
+                      className="w-8 h-8"
+                      style={{ color: 'var(--primary)' }}
+                    />
+                  </div>
+                  <p
+                    className="text-base font-bold"
+                    style={{ color: 'var(--ink-900)' }}
+                  >
+                    No submissions found
+                  </p>
+                  <p
+                    className="text-sm font-normal"
+                    style={{ color: 'var(--ink-600)' }}
+                  >
+                    Try adjusting your search query or filter options.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr
+                        className="text-xs font-bold uppercase tracking-wider"
+                        style={{
+                          background: 'var(--bg)',
+                          color: 'var(--ink-600)',
+                          borderBottom: '1px solid var(--border)',
+                        }}
+                      >
+                        <th className="py-4 px-6">Full name</th>
+                        <th className="py-4 px-6">Email address</th>
+                        <th className="py-4 px-6">Phone</th>
+                        <th className="py-4 px-6">Company</th>
+                        <th className="py-4 px-6">Date</th>
+                        <th className="py-4 px-6 text-right no-print">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLeads.map((lead) => (
+                        <tr
+                          key={lead._id}
+                          className="group transition-all"
+                          style={{ borderTop: '1px solid var(--border)' }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background =
+                              'var(--primary-soft)')
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = 'transparent')
+                          }
+                        >
+                          <td
+                            className="py-4 px-6 font-bold"
+                            style={{ color: 'var(--ink-900)' }}
+                          >
+                            {lead.firstName} {lead.surname}
+                          </td>
+                          <td
+                            className="py-4 px-6 font-semibold"
+                            style={{ color: 'var(--primary-dark)' }}
+                          >
+                            {lead.email}
+                          </td>
+                          <td
+                            className="py-4 px-6 font-medium"
+                            style={{ color: 'var(--ink-600)' }}
+                          >
+                            {lead.phone}
+                          </td>
+                          <td
+                            className="py-4 px-6 font-medium"
+                            style={{ color: 'var(--ink-600)' }}
+                          >
+                            {lead.company || '—'}
+                          </td>
+                          <td
+                            className="py-4 px-6 text-xs font-semibold"
+                            style={{ color: 'var(--ink-400)' }}
+                          >
+                            {new Date(lead.createdAt).toLocaleDateString(
+                              'en-US',
+                              {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              },
+                            )}
+                          </td>
+                          <td className="py-4 px-6 text-right no-print">
+                            <button
+                              onClick={() => promptDelete(lead)}
+                              title="Delete submission"
+                              className="p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer border border-transparent hover:border-red-200"
+                              style={{
+                                color: 'var(--warn)',
+                                background: 'var(--warn-soft)',
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* BLURRED BACKGROUND CONFIRMATION MODAL */}
+      {/* Delete Confirmation Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 relative">
-            {/* Close Icon Button */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div
+            className="rounded-3xl max-w-md w-full p-8 space-y-6 relative border bg-white"
+            style={{ borderColor: 'var(--border)' }}
+          >
             <button
               onClick={cancelDelete}
-              className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
+              className="absolute top-6 right-6 p-2 rounded-full transition-colors cursor-pointer"
+              style={{ color: 'var(--ink-400)' }}
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* Warning Icon Header */}
-            <div className="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mb-2">
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center"
+              style={{ background: 'var(--warn-soft)', color: 'var(--warn)' }}
+            >
               <AlertTriangle className="w-7 h-7" />
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                Delete Submission?
+              <h3
+                className="text-xl font-extrabold tracking-tight"
+                style={{ color: 'var(--ink-900)' }}
+              >
+                Delete submission?
               </h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Are you sure you want to delete{' '}
-                <span className="font-semibold text-slate-800">
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: 'var(--ink-600)' }}
+              >
+                This will permanently delete records for{' '}
+                <span className="font-bold" style={{ color: 'var(--ink-900)' }}>
                   {leadToDelete?.firstName} {leadToDelete?.surname}
-                </span>
-                ? This action cannot be undone.
+                </span>{' '}
+                from your database.
               </p>
             </div>
 
-            {/* Modal Actions */}
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={cancelDelete}
                 disabled={isDeleting}
-                className="flex-1 py-3 px-4 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all text-sm cursor-pointer disabled:opacity-50"
+                className="flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-colors cursor-pointer disabled:opacity-50 border bg-white"
+                style={{
+                  borderColor: 'var(--border)',
+                  color: 'var(--ink-600)',
+                }}
               >
                 Cancel
               </button>
@@ -437,9 +855,10 @@ export default function AdminDashboard() {
                 type="button"
                 onClick={confirmDelete}
                 disabled={isDeleting}
-                className="flex-1 py-3 px-4 rounded-xl font-semibold text-white bg-rose-600 hover:bg-rose-700 transition-all text-sm shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-colors cursor-pointer disabled:opacity-50 text-white flex items-center justify-center gap-2"
+                style={{ background: 'var(--warn)' }}
               >
-                {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+                {isDeleting ? 'Deleting...' : 'Confirm delete'}
               </button>
             </div>
           </div>

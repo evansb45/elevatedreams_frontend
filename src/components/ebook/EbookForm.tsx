@@ -25,25 +25,18 @@ export default function EbookForm() {
 
   const [loading, setLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false) // Controls transition to success view
-  const [status, setStatus] = useState<{
-    type: 'success' | 'error'
-    msg: string
-  } | null>(null)
+  const [status, setStatus] = useState(null)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault()
     setLoading(true)
     setStatus(null)
 
     try {
-      console.log(
-        '[Client handleSubmit] Sending POST request to /api/ebook-download...',
-        formData,
-      )
       const res = await fetch('/api/ebook-download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,7 +69,7 @@ export default function EbookForm() {
 
       // Switch to the success confirmation view
       setIsSubmitted(true)
-    } catch (err: any) {
+    } catch (err) {
       setStatus({
         type: 'error',
         msg: err.message || 'Something went wrong. Please try again.',
@@ -93,58 +86,58 @@ export default function EbookForm() {
 
   return (
     <main
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex items-center justify-center"
       style={{ fontFamily: "'General Sans', sans-serif" }}
     >
       <div className="w-full max-w-md mx-auto">
-        <div className="bg-white rounded-3xl overflow-hidden  transition-all duration-300">
+        <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 transition-all duration-300">
           {/* CONDITIONAL VIEW: SUCCESS STATE VS FORM STATE */}
           {isSubmitted ? (
-            <div className="p-8 text-center space-y-6">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2">
-                <CheckCircle2 className="w-8 h-8" />
+            <div className="p-4 text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 bg-teal-50 border border-teal-100">
+                <CheckCircle2 className="w-8 h-8 text-teal-600" />
               </div>
 
               <div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                  Submission Received!
+                  Submission received
                 </h2>
                 <p className="mt-2 text-slate-600 text-sm sm:text-[15px] leading-relaxed">
-                  Thank you for your interest. Your download should begin
+                  Thanks for your interest. Your download should begin
                   automatically, and a copy has been sent to your email.
                 </p>
               </div>
 
               {/* Available Resources Section with Distinct Routes */}
               <div className="bg-slate-50 p-4 rounded-2xl text-left space-y-3 border border-slate-100">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Available Resources:
+                <p className="text-xs font-bold text-slate-500 tracking-wide">
+                  Available resources
                 </p>
                 <div className="space-y-2">
                   {/* Business Formation Download */}
                   <a
                     href="/documents/usguide.pdf"
                     download="usguide.pdf"
-                    className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200  transition-all text-sm font-semibold text-slate-700 group "
+                    className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200 hover:border-teal-300 transition-all text-sm font-semibold text-slate-700 group"
                   >
                     <span className="flex items-center gap-2">
                       <Download className="w-4 h-4 text-teal-600 shrink-0" />
-                      Download e-book / Business Formation
+                      Business Formation guide
                     </span>
-                    <ArrowRight className="w-4 h-4 text-slate-400 transition-transform shrink-0" />
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-teal-500 group-hover:translate-x-0.5 transition-all shrink-0" />
                   </a>
 
                   {/* Intellectual Property Download */}
                   <a
                     href="/documents/ip.pdf"
                     download="ip.pdf"
-                    className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200  transition-all text-sm font-semibold text-slate-700 group "
+                    className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200 hover:border-teal-300 transition-all text-sm font-semibold text-slate-700 group"
                   >
                     <span className="flex items-center gap-2">
                       <Download className="w-4 h-4 text-teal-600 shrink-0" />
-                      Download e-book / Intellectual Property
+                      Intellectual Property guide
                     </span>
-                    <ArrowRight className="w-4 h-4 text-slate-400 transition-transform shrink-0" />
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-teal-500 group-hover:translate-x-0.5 transition-all shrink-0" />
                   </a>
                 </div>
               </div>
@@ -153,10 +146,10 @@ export default function EbookForm() {
               <button
                 type="button"
                 onClick={handleBookConsultation}
-                className="w-full py-3.5 px-6 rounded-2xl font-bold text-slate-900 text-[15px] tracking-tight transition-all duration-300 ease-in-out flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] cursor-pointer bg-[#facc15]"
+                className="w-full py-3.5 px-6 rounded-2xl font-bold text-white text-[15px] tracking-tight transition-all duration-300 ease-in-out flex items-center justify-center gap-2 hover:bg-teal-700 active:scale-[0.99] cursor-pointer bg-teal-600"
               >
                 <Calendar className="w-4 h-4" />
-                <span>Book Consultation</span>
+                <span>Book a consultation</span>
               </button>
             </div>
           ) : (
@@ -165,7 +158,7 @@ export default function EbookForm() {
               {/* Header */}
               <div className="text-center pt-8 px-6 sm:px-8">
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                  Get Your Free Ebook
+                  Get your free ebook
                 </h2>
                 <p className="mt-2 sm:mt-3 text-slate-600 text-sm sm:text-[15px] leading-snug font-normal">
                   Complete the fields below to instantly receive your download.
@@ -177,7 +170,7 @@ export default function EbookForm() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                      First Name <span className="text-yellow-600">*</span>
+                      First name <span className="text-teal-600">*</span>
                     </label>
                     <div className="relative flex items-center">
                       <User className="absolute left-4 w-4 h-4 text-teal-600 pointer-events-none transition-colors duration-200" />
@@ -195,7 +188,7 @@ export default function EbookForm() {
 
                   <div>
                     <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                      Surname <span className="text-yellow-600">*</span>
+                      Surname <span className="text-teal-600">*</span>
                     </label>
                     <div className="relative flex items-center">
                       <User className="absolute left-4 w-4 h-4 text-teal-600 pointer-events-none transition-colors duration-200" />
@@ -215,7 +208,7 @@ export default function EbookForm() {
                 {/* Email Address */}
                 <div>
                   <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                    Email Address <span className="text-yellow-600">*</span>
+                    Email address <span className="text-teal-600">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <Mail className="absolute left-4 w-4 h-4 text-teal-600 pointer-events-none transition-colors duration-200" />
@@ -234,7 +227,7 @@ export default function EbookForm() {
                 {/* Phone Number */}
                 <div>
                   <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                    Phone Number <span className="text-yellow-600">*</span>
+                    Phone number <span className="text-teal-600">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <Phone className="absolute left-4 w-4 h-4 text-teal-600 pointer-events-none transition-colors duration-200" />
@@ -253,7 +246,7 @@ export default function EbookForm() {
                 {/* Company Name */}
                 <div>
                   <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                    Company Name
+                    Company name
                   </label>
                   <div className="relative flex items-center">
                     <Building2 className="absolute left-4 w-4 h-4 text-teal-600 pointer-events-none transition-colors duration-200" />
@@ -272,22 +265,16 @@ export default function EbookForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="mt-6 w-full py-3.5 px-6 rounded-2xl font-bold text-slate-900 text-[15px] tracking-tight transition-all duration-300 ease-in-out flex items-center justify-center gap-2 group hover:scale-[1.01] active:scale-[0.99] disabled:hover:scale-100 cursor-pointer disabled:cursor-not-allowed"
-                  style={{
-                    background: loading
-                      ? 'linear-gradient(to right, #64748b, #475569)'
-                      : '#facc15',
-                    color: loading ? '#ffffff' : '#0f172a',
-                  }}
+                  className="mt-6 w-full py-3.5 px-6 rounded-2xl font-bold text-white text-[15px] tracking-tight transition-all duration-300 ease-in-out flex items-center justify-center gap-2 group active:scale-[0.99] disabled:cursor-not-allowed cursor-pointer bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin text-white" />
-                      <span className="text-white">Processing...</span>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Processing...</span>
                     </>
                   ) : (
                     <>
-                      <span>Get Instant Access</span>
+                      <span>Get instant access</span>
                       <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </>
                   )}
