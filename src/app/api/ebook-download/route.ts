@@ -23,10 +23,10 @@ export async function POST(request: Request) {
     if (!validationResult.success) {
       console.warn(
         '[API /api/ebook-download] Validation failed:',
-        validationResult.error.errors,
+        validationResult.error.issues,
       )
       return NextResponse.json(
-        { error: validationResult.error.errors[0].message },
+        { error: validationResult.error.issues[0].message },
         { status: 400 },
       )
     }
